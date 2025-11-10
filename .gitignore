@@ -1,0 +1,21 @@
+# Ignorar variáveis de ambiente
+.env
+
+# Ignorar dependências e builds
+node_modules/
+dist/
+build/
+
+# Ignorar arquivos de log
+*.log
+
+# Ignorar configurações específicas de editores
+.vscode/
+.idea/
+
+# Ignorar arquivos de sistema do Mac
+.DS_Store
+
+# Ignorar arquivos desnecessários para o projeto
+*.sublime-workspace
+*.swp

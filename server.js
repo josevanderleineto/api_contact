@@ -40,23 +40,32 @@ app.post('/contact', async (req, res) => {
     });
   }
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_PASS
-    }
-  });
+  // Verifique se o Gmail está configurado antes de tentar enviar
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
+    return res.status(200).json({
+      info: "Envio de e-mail NÃO está ativo. Mensagem recebida apenas localmente.",
+      contact: { nome: name, email, assunto: subject, mensagem: message }
+    });
+  }
 
-  const mailOptions = {
-    from: `"${name}" <${email}>`,
-    to: process.env.GMAIL_USER,
-    subject: `[PORTFOLIO] ${subject}`,
-    html: `
-       <div style="max-width:500px;width:95%;margin:20px auto;background:#ffffff;border-radius:10px;border:1px solid #dbe2ea;box-shadow:0 4px 10px rgba(0,0,0,0.08);font-family:'Segoe UI',Arial,sans-serif;">
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: `"${name}" <${email}>`,
+      to: process.env.GMAIL_USER,
+      subject: `[PORTFOLIO] ${subject}`,
+      html: `
+        <div style="max-width:500px;width:95%;margin:20px auto;background:#ffffff;border-radius:10px;border:1px solid #dbe2ea;box-shadow:0 4px 10px rgba(0,0,0,0.08);font-family:'Segoe UI',Arial,sans-serif;">
   <div style="background:#007BFF;padding:20px 10px;border-radius:10px 10px 0 0;text-align:center;">
     <h1 style="color:#fff;font-size:20px;margin:0;line-height:1.3;">
-      Nova mensagem de contato do portfólio
+      Nova mensagem de contato
     </h1>
   </div>
   <div style="padding:18px 16px;">
@@ -84,22 +93,18 @@ app.post('/contact', async (req, res) => {
   </div>
 </div>
 
-    `
-  };
+      `
+    };
 
-  try {
     const info = await transporter.sendMail(mailOptions);
+
     return res.status(200).json({
       success: true,
       message: "Contato recebido com sucesso e enviado por e-mail!",
-      contact: {
-        nome: name,
-        email: email,
-        assunto: subject,
-        mensagem: message
-      },
+      contact: { nome: name, email, assunto: subject, mensagem: message },
       mailId: info.messageId
     });
+
   } catch (error) {
     return res.status(500).json({
       error: "Erro ao enviar e-mail.",
