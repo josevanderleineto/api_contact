@@ -1,24 +1,22 @@
-import express from 'express';
-import bodyParser from 'body-parser';
 import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
 
-dotenv.config();
-
-const app = express();
-app.use(bodyParser.json());
-
-app.post('/api/contact', async (req, res) => {
-  const { name, email, subject, message } = req.body;
-
-  if (!name || !email || !subject || !message) {
-    return res.status(400).json({
-      error: 'Todos os campos são obrigatórios: nome, email, assunto e mensagem.'
-    });
+export default async function handler(req, res) {
+  // Só aceita POST!
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método não permitido. Use POST.' });
   }
 
+  // Pegando dados do body
+  const { name, email, subject, message } = req.body;
+
+  // Validação básica
+  if (!name || !email || !subject || !message) {
+    return res.status(400).json({ error: 'Todos os campos são obrigatórios: nome, email, assunto e mensagem.' });
+  }
+
+  // HTML estilizado
   const html = `
-     <div style="max-width:480px;width:95%;margin:20px auto;background:#ffffff;border-radius:10px;border:1px solid #dbe2ea;box-shadow:0 4px 10px rgba(0,0,0,0.08);font-family:'Segoe UI',Arial,sans-serif;">
+     <div style="max-width:500px;width:95%;margin:20px auto;background:#ffffff;border-radius:10px;border:1px solid #dbe2ea;box-shadow:0 4px 10px rgba(0,0,0,0.08);font-family:'Segoe UI',Arial,sans-serif;">
   <div style="background:#007BFF;padding:20px 10px;border-radius:10px 10px 0 0;text-align:center;">
     <h1 style="color:#fff;font-size:20px;margin:0;line-height:1.3;">
       Nova mensagem de contato
@@ -49,9 +47,9 @@ app.post('/api/contact', async (req, res) => {
   </div>
 </div>
 
-
   `;
 
+  // Se variáveis não estiverem no dashboard da Vercel, só retorna mensagem normal
   if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
     return res.status(200).json({
       info: "Envio de e-mail NÃO está ativo. Mensagem recebida apenas localmente.",
@@ -60,6 +58,7 @@ app.post('/api/contact', async (req, res) => {
   }
 
   try {
+    // Configurar e enviar e-mail
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -85,8 +84,4 @@ app.post('/api/contact', async (req, res) => {
       detail: error.message
     });
   }
-});
-
-app.listen(3001, () => {
-  console.log('API de contato local rodando em http://localhost:3001/api/contact');
-});
+}

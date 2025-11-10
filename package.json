@@ -2,11 +2,7 @@
   "name": "contact-api",
   "version": "1.0.0",
   "type": "module",
-  "description": "API de contato serverless para Vercel",
   "dependencies": {
-    "body-parser": "^2.2.0",
-    "dotenv": "^17.2.3",
-    "express": "^5.1.0",
     "nodemailer": "^7.0.10"
   }
 }

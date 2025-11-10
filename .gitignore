@@ -19,3 +19,4 @@ build/
 # Ignorar arquivos desnecessários para o projeto
 *.sublime-workspace
 *.swp
+.vercel
