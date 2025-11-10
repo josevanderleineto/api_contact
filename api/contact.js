@@ -24,12 +24,12 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Todos os campos são obrigatórios: nome, email, assunto e mensagem.' });
   }
 
-  // HTML estilizado
+  // HTML estilizadoe para o e-mail
   const html = `
     <div style="max-width:500px;width:95%;margin:20px auto;background:#ffffff;border-radius:10px;border:1px solid #dbe2ea;box-shadow:0 4px 10px rgba(0,0,0,0.08);font-family:'Segoe UI',Arial,sans-serif;">
       <div style="background:#007BFF;padding:20px 10px;border-radius:10px 10px 0 0;text-align:center;">
         <h1 style="color:#fff;font-size:20px;margin:0;line-height:1.3;">
-          Nova mensagem de contato
+          Nova mensagem de contato do Portfólio
         </h1>
       </div>
       <div style="padding:18px 16px;">
