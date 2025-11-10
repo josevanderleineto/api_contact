@@ -1,37 +1,14 @@
-const express = require('express');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const nodemailer = require('nodemailer');
+import express from 'express';
+import bodyParser from 'body-parser';
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3001;
+app.use(bodyParser.json());
 
-const allowedOrigins = [
-  'http://localhost:3000',
-  process.env.FRONTEND_URL
-];
-
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  }
-};
-
-app.use(cors(corsOptions));
-app.use(express.json());
-
-app.get('/', (req, res) => {
-  res.status(200).json({ message: 'Contact API is running!' });
-});
-
-app.post('/contact', async (req, res) => {
+app.post('/api/contact', async (req, res) => {
   const { name, email, subject, message } = req.body;
 
   if (!name || !email || !subject || !message) {
@@ -40,29 +17,8 @@ app.post('/contact', async (req, res) => {
     });
   }
 
-  // Verifique se o Gmail está configurado antes de tentar enviar
-  if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
-    return res.status(200).json({
-      info: "Envio de e-mail NÃO está ativo. Mensagem recebida apenas localmente.",
-      contact: { nome: name, email, assunto: subject, mensagem: message }
-    });
-  }
-
-  try {
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS
-      }
-    });
-
-    const mailOptions = {
-      from: `"${name}" <${email}>`,
-      to: process.env.GMAIL_USER,
-      subject: `[PORTFOLIO] ${subject}`,
-      html: `
-        <div style="max-width:500px;width:95%;margin:20px auto;background:#ffffff;border-radius:10px;border:1px solid #dbe2ea;box-shadow:0 4px 10px rgba(0,0,0,0.08);font-family:'Segoe UI',Arial,sans-serif;">
+  const html = `
+     <div style="max-width:480px;width:95%;margin:20px auto;background:#ffffff;border-radius:10px;border:1px solid #dbe2ea;box-shadow:0 4px 10px rgba(0,0,0,0.08);font-family:'Segoe UI',Arial,sans-serif;">
   <div style="background:#007BFF;padding:20px 10px;border-radius:10px 10px 0 0;text-align:center;">
     <h1 style="color:#fff;font-size:20px;margin:0;line-height:1.3;">
       Nova mensagem de contato
@@ -93,18 +49,35 @@ app.post('/contact', async (req, res) => {
   </div>
 </div>
 
-      `
-    };
+  `;
 
-    const info = await transporter.sendMail(mailOptions);
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
+    return res.status(200).json({
+      info: "Envio de e-mail NÃO está ativo. Mensagem recebida apenas localmente.",
+      contact: { nome: name, email, assunto: subject, mensagem: message }
+    });
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS
+      }
+    });
+
+    await transporter.sendMail({
+      from: `"${name}" <${email}>`,
+      to: process.env.GMAIL_USER,
+      subject: `[PORTFOLIO] ${subject}`,
+      html
+    });
 
     return res.status(200).json({
       success: true,
-      message: "Contato recebido com sucesso e enviado por e-mail!",
-      contact: { nome: name, email, assunto: subject, mensagem: message },
-      mailId: info.messageId
+      message: "Contato recebido com sucesso e enviado por e-mail!"
     });
-
   } catch (error) {
     return res.status(500).json({
       error: "Erro ao enviar e-mail.",
@@ -113,6 +86,6 @@ app.post('/contact', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+app.listen(3001, () => {
+  console.log('API de contato local rodando em http://localhost:3001/api/contact');
 });

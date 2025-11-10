@@ -1,20 +1,12 @@
 {
   "name": "contact-api",
   "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "Esta é uma API simples construída com Node.js e Express para receber mensagens do formulário de contato do seu portfólio.",
+  "type": "module",
+  "description": "API de contato serverless para Vercel",
   "dependencies": {
-    "cors": "^2.8.5",
+    "body-parser": "^2.2.0",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "nodemailer": "^7.0.10"
-  },
-  "type": "commonjs"
+  }
 }
